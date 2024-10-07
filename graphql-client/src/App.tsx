@@ -1,30 +1,39 @@
 import { useQuery, gql } from "@apollo/client";
 import React from "react";
 
+import Form from "./Form"
+import Button from "./Button"
+
+
 const GET_LOCATIONS = gql`
-  query getLocations {
-    locations {
-      id
-      name
-      description
-      photo
+ query ExampleQuery {
+  layout(page: "Home") {
+    page
+    components {
+      type_
+      label
+      action {
+        id_
+        action
+      }
+      ... on Form {
+        name
+        value
+      }
     }
   }
+}
+
 `;
 
-function DisplayLocations() {
+function Layout() {
   const { loading, error, data } = useQuery(GET_LOCATIONS);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
-  return data.locations.map(({ id, name, description, photo }) => (
-    <div key={id}>
-      <h3>{name}</h3>
-      <img width="400" height="250" alt="location-reference" src={`${photo}`} />
-      <br />
-      <b>About this location:</b>
-      <p>{description}</p>
-      <br />
+  return data.layout.components.map((uiElement) => (
+    <div key={uiElement.action.id_}>
+      {uiElement.type_ === "Form" ? <Form {...uiElement} /> : <Button {...uiElement} />}
     </div>
   ));
 }
@@ -39,7 +48,7 @@ export default function App() {
         </span>
       </h2>
       <br />
-      <DisplayLocations />
+      <Layout />
     </div>
   );
 }
